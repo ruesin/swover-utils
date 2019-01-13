@@ -35,7 +35,7 @@ class Log
 
     private static function log($msg, $file, $folder)
     {
-        $path = ROOT_DIR . '/runtime/log/' . $folder;
+        $path = self::$log_path . $folder;
         $file = $file ?: 'default';
         if (!file_exists($path)) {
             !is_dir($path) && mkdir($path, 0777, true);
