@@ -1,7 +1,7 @@
 {
     "name": "ruesin/utils",
     "description": "Some commonly used helper classes",
-    "keywords": ["utils", "redis","mysql","config"],
+    "keywords": ["utils", "config"],
     "homepage": "https://github.com/ruesin",
     "license": "Apache-2.0",
     "authors": [
@@ -11,10 +11,7 @@
         }
     ],
     "require": {
-        "predis/predis": "^1.1",
-        "ext-json" : "*",
-        "ext-pdo": "*",
-        "catfan/medoo": "^1.6"
+        "ext-json" : "*"
     },
     "autoload": {
         "psr-4": {
