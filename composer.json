@@ -1,7 +1,7 @@
 {
     "name": "ruesin/utils",
     "description": "Some commonly used helper classes",
-    "keywords": ["utils", "config"],
+    "keywords": ["utils", "config", "log"],
     "homepage": "https://github.com/ruesin",
     "license": "Apache-2.0",
     "authors": [
