@@ -5,27 +5,60 @@ namespace Ruesin\Utils;
 
 /**
  * Config set & get like Laravel
+ * @method static get($key, $default = null)
+ * @method static set($key, $value)
  */
 class Config
 {
 
-    private static $config = [];
+    private $config = [];
+
+    private static $instance = null;
+
+    private function __construct(string $name)
+    {
+        if (is_file($name)) {
+            return $this->loadFile($name);
+        }
+
+        return $this->loadPath($name);
+    }
+
+    /**
+     * Load the configuration and return instance
+     *
+     * @param string $name
+     * @return Config
+     */
+    public static function load(string $name)
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new self($name);
+        }
+        return self::$instance;
+    }
+
+    public static function getInstance()
+    {
+        return self::$instance;
+    }
 
     /**
      * Loads the configuration file under the path into the application
      *
      * @param  string $path
-     * @return void
+     * @return bool
      */
-    public static function loadPath($path)
+    private function loadPath($path)
     {
         $path = rtrim($path, '/') . '/';
         $files = scandir($path);
         foreach ($files as $file) {
             if ($file != "." && $file != "..") {
-                self::loadFile($path . $file);
+                $this->loadFile($path . $file);
             }
         }
+        return true;
     }
 
     /**
@@ -34,15 +67,38 @@ class Config
      * @param  string $file_name
      * @return bool
      */
-    public static function loadFile($file_name)
+    private function loadFile($file_name)
     {
         if (!is_file($file_name)) return false;
-
         if (strrchr($file_name, '.') !== '.php') return false;
-
-        self::set(basename($file_name, '.php'), require $file_name);
-
+        $this->set(basename($file_name, '.php'), require $file_name);
         return true;
+    }
+
+    public function __call($name, $arguments)
+    {
+        $name .= 'Config';
+
+        if (!method_exists($this, $name)) {
+            throw new \Exception('Not Found Config Method!');
+        }
+
+        return call_user_func_array([$this, $name], $arguments);
+    }
+
+    public static function __callStatic($name, $arguments)
+    {
+        if (!self::$instance instanceof self) {
+            throw new \Exception('Not Found Config Instance!');
+        }
+
+        $name .= 'Config';
+
+        if (!method_exists(self::$instance, $name)) {
+            throw new \Exception('Not Found Config Method!');
+        }
+
+        return call_user_func_array([self::$instance, $name], $arguments);
     }
 
     /**
@@ -52,13 +108,13 @@ class Config
      * @param  mixed $default
      * @return mixed
      */
-    public static function get($key, $default = null)
+    private function getConfig($key, $default = null)
     {
-        if (empty(self::$config)) {
+        if (empty($this->config)) {
             return $default;
         }
 
-        $array = self::$config;
+        $array = $this->config;
 
         if (is_null($key)) {
             return $array;
@@ -85,9 +141,9 @@ class Config
      * @param  mixed $value
      * @return array
      */
-    public static function set($key, $value)
+    private function setConfig($key, $value)
     {
-        $array = &self::$config;
+        $array = &$this->config;
 
         //If no key is given to the method, the entire array will be replaced.
         //if (is_null($key)) {
