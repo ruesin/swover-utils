@@ -5,15 +5,15 @@ namespace Ruesin\Utils;
 
 /**
  * Config set & get like Laravel
- *
- * @method static get($key, $default = null)
- * @method static set($key, $value)
  */
 class Config
 {
 
     private $config = [];
 
+    /**
+     * @var Config
+     */
     private static $instance = null;
 
     private function __construct()
@@ -71,34 +71,26 @@ class Config
     {
         if (!is_file($file_name)) return false;
         if (strrchr($file_name, '.') !== '.php') return false;
-        $this->set(basename($file_name, '.php'), require $file_name);
+        $this->setConfig(basename($file_name, '.php'), require $file_name);
         return true;
     }
 
-    public function __call($name, $arguments)
+    public static function get($key, $default = null)
     {
-        $name .= 'Config';
-
-        if (!method_exists($this, $name)) {
-            throw new \Exception('Not Found Config Method!');
+        if (self::$instance instanceof Config) {
+            return self::$instance->getConfig($key, $default);
         }
 
-        return call_user_func_array([$this, $name], $arguments);
+        return false;
     }
 
-    public static function __callStatic($name, $arguments)
+    public static function set($key, $value)
     {
-        if (!self::$instance instanceof Config) {
-            throw new \Exception('Not Found Config Instance!');
+        if (self::$instance instanceof Config) {
+            return self::$instance->setConfig($key, $value);
         }
 
-        $name .= 'Config';
-
-        if (!method_exists(self::$instance, $name)) {
-            throw new \Exception('Not Found Config Method!');
-        }
-
-        return call_user_func_array([self::$instance, $name], $arguments);
+        return false;
     }
 
     /**
