@@ -5,6 +5,7 @@ namespace Ruesin\Utils;
 
 /**
  * Config set & get like Laravel
+ *
  * @method static get($key, $default = null)
  * @method static set($key, $value)
  */
@@ -15,13 +16,8 @@ class Config
 
     private static $instance = null;
 
-    private function __construct(string $name)
+    private function __construct()
     {
-        if (is_file($name)) {
-            return $this->loadFile($name);
-        }
-
-        return $this->loadPath($name);
     }
 
     /**
@@ -30,16 +26,20 @@ class Config
      * @param string $name
      * @return Config
      */
-    public static function load(string $name)
+    public static function load(string $name = '')
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self($name);
+            self::$instance = new self();
         }
-        return self::$instance;
-    }
 
-    public static function getInstance()
-    {
+        if (!$name) return self::$instance;
+
+        if (is_file($name)) {
+            self::$instance->loadFile($name);
+        } elseif (is_dir($name)) {
+            self::$instance->loadPath($name);
+        }
+
         return self::$instance;
     }
 
@@ -88,7 +88,7 @@ class Config
 
     public static function __callStatic($name, $arguments)
     {
-        if (!self::$instance instanceof self) {
+        if (!self::$instance instanceof Config) {
             throw new \Exception('Not Found Config Instance!');
         }
 
