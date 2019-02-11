@@ -65,16 +65,17 @@ class Config
      * Load a configuration file into the application.
      *
      * @param  string $file_name
-     * @return bool | Config
+     * @return bool
      */
     public static function loadFile($file_name)
     {
         if (!is_file($file_name)) return false;
         if (strrchr($file_name, '.') !== '.php') return false;
         if (!self::$instance instanceof Config) {
-            return self::load($file_name);
+            self::load($file_name);
+        } else {
+            self::$instance::set(basename($file_name, '.php'), require $file_name);
         }
-        self::$instance::set(basename($file_name, '.php'), require $file_name);
         return true;
     }
 
