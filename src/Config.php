@@ -2,53 +2,31 @@
 
 namespace Ruesin\Utils;
 
-
 /**
  * Config set & get like Laravel
  */
 class Config
 {
 
-    private $config = [];
+    private static $config = [];
 
     /**
-     * @var Config
-     */
-    private static $instance = null;
-
-    private function __construct()
-    {
-    }
-
-    /**
-     * create instance
-     */
-    public static function getInstance()
-    {
-        if (is_null(self::$instance) || !self::$instance instanceof Config) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-
-    /**
-     * Load the configuration and return instance
+     * Load the configuration
      *
      * @param string $name
-     * @return Config
+     * @return bool
      */
-    public static function load(string $name = '')
+    public static function load(string $name)
     {
-        if (!$name) return self::getInstance();
-
         if (is_file($name)) {
-            self::getInstance()::loadFile($name);
-        } elseif (is_dir($name)) {
-            self::getInstance()::loadPath($name);
+            return self::loadFile($name);
         }
 
-        return self::$instance;
+        if (is_dir($name)) {
+            return self::loadPath($name);
+        }
+
+        return false;
     }
 
     /**
@@ -78,9 +56,10 @@ class Config
     public static function loadFile($file_name)
     {
         if (!is_file($file_name)) return false;
+
         if (strrchr($file_name, '.') !== '.php') return false;
 
-        self::getInstance()::set(basename($file_name, '.php'), require $file_name);
+        self::set(basename($file_name, '.php'), require $file_name);
 
         return true;
     }
@@ -94,35 +73,11 @@ class Config
      */
     public static function get($key, $default = null)
     {
-        return self::getInstance()->getConfig($key, $default);
-    }
-
-    /**
-     * Set an array item to a given value using "dot" notation.
-     *
-     * @param  string $key
-     * @param  mixed $value
-     * @return array
-     */
-    public static function set($key, $value)
-    {
-        return self::getInstance()->setConfig($key, $value);
-    }
-
-    /**
-     * Get an item from an array using "dot" notation.
-     *
-     * @param  string $key
-     * @param  mixed $default
-     * @return mixed
-     */
-    private function getConfig($key, $default = null)
-    {
-        if (empty($this->config)) {
+        if (empty(self::$config)) {
             return $default;
         }
 
-        $array = $this->config;
+        $array = self::$config;
 
         if (is_null($key)) {
             return $array;
@@ -149,9 +104,9 @@ class Config
      * @param  mixed $value
      * @return array
      */
-    private function setConfig($key, $value)
+    public static function set($key, $value)
     {
-        $array = &$this->config;
+        $array = &self::$config;
 
         //If no key is given to the method, the entire array will be replaced.
         //if (is_null($key)) {
