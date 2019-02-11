@@ -21,6 +21,18 @@ class Config
     }
 
     /**
+     * create instance
+     */
+    public static function getInstance()
+    {
+        if (is_null(self::$instance) || !self::$instance instanceof Config) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    /**
      * Load the configuration and return instance
      *
      * @param string $name
@@ -28,16 +40,12 @@ class Config
      */
     public static function load(string $name = '')
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-
-        if (!$name) return self::$instance;
+        if (!$name) return self::getInstance();
 
         if (is_file($name)) {
-            self::$instance::loadFile($name);
+            self::getInstance()::loadFile($name);
         } elseif (is_dir($name)) {
-            self::$instance::loadPath($name);
+            self::getInstance()::loadPath($name);
         }
 
         return self::$instance;
@@ -71,11 +79,9 @@ class Config
     {
         if (!is_file($file_name)) return false;
         if (strrchr($file_name, '.') !== '.php') return false;
-        if (!self::$instance instanceof Config) {
-            self::load($file_name);
-        } else {
-            self::$instance::set(basename($file_name, '.php'), require $file_name);
-        }
+
+        self::getInstance()::set(basename($file_name, '.php'), require $file_name);
+
         return true;
     }
 
@@ -88,11 +94,7 @@ class Config
      */
     public static function get($key, $default = null)
     {
-        if (self::$instance instanceof Config) {
-            return self::$instance->getConfig($key, $default);
-        }
-
-        return false;
+        return self::getInstance()->getConfig($key, $default);
     }
 
     /**
@@ -104,11 +106,7 @@ class Config
      */
     public static function set($key, $value)
     {
-        if (self::$instance instanceof Config) {
-            return self::$instance->setConfig($key, $value);
-        }
-
-        return false;
+        return self::getInstance()->setConfig($key, $value);
     }
 
     /**
