@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $config = \Ruesin\Utils\Config::load(__DIR__ . '/config/redis.php');
-$config2 = \Ruesin\Utils\Config::load(__DIR__ . '/config/server.php');
+$config2 = \Ruesin\Utils\Config::loadFile(__DIR__ . '/config/server.php');
 
 var_dump($config == $config2);
 echo PHP_EOL;

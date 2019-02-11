@@ -35,9 +35,9 @@ class Config
         if (!$name) return self::$instance;
 
         if (is_file($name)) {
-            self::$instance->loadFile($name);
+            self::$instance::loadFile($name);
         } elseif (is_dir($name)) {
-            self::$instance->loadPath($name);
+            self::$instance::loadPath($name);
         }
 
         return self::$instance;
@@ -49,13 +49,13 @@ class Config
      * @param  string $path
      * @return bool
      */
-    private function loadPath($path)
+    public static function loadPath($path)
     {
         $path = rtrim($path, '/') . '/';
         $files = scandir($path);
         foreach ($files as $file) {
             if ($file != "." && $file != "..") {
-                $this->loadFile($path . $file);
+                self::loadFile($path . $file);
             }
         }
         return true;
@@ -65,16 +65,26 @@ class Config
      * Load a configuration file into the application.
      *
      * @param  string $file_name
-     * @return bool
+     * @return bool | Config
      */
-    private function loadFile($file_name)
+    public static function loadFile($file_name)
     {
         if (!is_file($file_name)) return false;
         if (strrchr($file_name, '.') !== '.php') return false;
-        $this->setConfig(basename($file_name, '.php'), require $file_name);
+        if (!self::$instance instanceof Config) {
+            return self::load($file_name);
+        }
+        self::$instance::set(basename($file_name, '.php'), require $file_name);
         return true;
     }
 
+    /**
+     * Get an item from an array using "dot" notation.
+     *
+     * @param  string $key
+     * @param  mixed $default
+     * @return mixed
+     */
     public static function get($key, $default = null)
     {
         if (self::$instance instanceof Config) {
@@ -84,6 +94,13 @@ class Config
         return false;
     }
 
+    /**
+     * Set an array item to a given value using "dot" notation.
+     *
+     * @param  string $key
+     * @param  mixed $value
+     * @return array
+     */
     public static function set($key, $value)
     {
         if (self::$instance instanceof Config) {
