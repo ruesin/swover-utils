@@ -40,6 +40,6 @@ class Log
         if (!file_exists($path)) {
             !is_dir($path) && mkdir($path, 0777, true);
         }
-        file_put_contents($path . '/' . $file . '_' . posix_getpid() . '_' . date('Ymd') . ".log", $msg . PHP_EOL, FILE_APPEND);
+        file_put_contents($path . '/' . $file . '_' . self::$unique_id . '_' . date('Ymd') . ".log", $msg . PHP_EOL, FILE_APPEND);
     }
 }
