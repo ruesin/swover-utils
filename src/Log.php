@@ -5,7 +5,7 @@ namespace Ruesin\Utils;
 class Log
 {
     private static $log_path = '/tmp/';
-    private static $unique_id = 0;
+    private static $uniqueId = null;
 
     public static function init($config = [])
     {
@@ -16,9 +16,7 @@ class Log
             !is_dir(self::$log_path) && mkdir(self::$log_path, 0777, true);
         }
         if (isset($config['unique_id'])) {
-            self::$unique_id = $config['unique_id'];
-        } else {
-            self::$unique_id = posix_getpid();
+            self::$uniqueId = $config['unique_id'];
         }
     }
 
@@ -40,6 +38,14 @@ class Log
         if (!file_exists($path)) {
             !is_dir($path) && mkdir($path, 0777, true);
         }
-        file_put_contents($path . '/' . $file . '_' . self::$unique_id . '_' . date('Ymd') . ".log", $msg . PHP_EOL, FILE_APPEND);
+        file_put_contents($path . '/' . $file . '_' . self::getUniqueId() . '_' . date('Ymd') . ".log", $msg . PHP_EOL, FILE_APPEND);
+    }
+
+    public static function getUniqueId()
+    {
+        if (self::$uniqueId === null) {
+            self::$uniqueId = posix_getpid();
+        }
+        return self::$uniqueId;
     }
 }
